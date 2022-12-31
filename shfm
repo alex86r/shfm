@@ -368,19 +368,31 @@ main() {
             ;;
 
             /?)
+                ans=
                 prompt / r
 
                 IFS=
                 # globbing intentional, word splitting is disabled.
                 # shellcheck disable=2086
-                set -- $ans*
+                if [ -z "$ans" ]; then
+                    ans='*'
+                else
+                    search=$(find . -name "$ans*" -maxdepth 1 -exec basename {} \; | head -n 1)
+                    if [ -e "$search" ]; then
+                       ans=$ans*
+                    else
+                       ans=$(find . -iname "$ans*" -maxdepth 1 -exec basename {} \; | head -n 1)*
+                    fi
+                fi
+                set -- $ans
+
                 unset IFS
 
-                case $1$# in
-                    "$ans*1") set -- 'no results'
-                esac
+                if [ -z "$ans" ]; then
+                    set -- 'no results'
+                fi
 
-                y=1 y2=1 cur=$1 ltype="search $PWD/$ans*"
+                y=1 y2=1 cur=$1 ltype="search $PWD/$ans"
                 redraw "$@"
                 status_line "$#"
             ;;
