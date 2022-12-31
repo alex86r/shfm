@@ -325,7 +325,7 @@ main() {
                 redraw "$@"
             ;;
 
-            g?)
+            g?|H2)
                 case $y in
                     1) continue
                 esac
@@ -334,7 +334,7 @@ main() {
                 redraw "$@"
             ;;
 
-            G?)
+            G?|F2)
                 y=$#
                 y2=$(($# < bottom ? $# : bottom))
                 line_print "$y" "$@"
