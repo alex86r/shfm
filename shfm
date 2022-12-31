@@ -406,14 +406,25 @@ main() {
                 redraw "$@"
             ;;
 
+            e?)
+                cmd_run "${EDITOR:=vi}" "$cur"
+                redraw "$@"
+            ;;  
+
+            x?)
+                $TERM & 
+            ;;
+
             \??)
                 set -- 'j - down' \
                        'k - up' \
                        'l - open file or directory' \
+                       'e - edit file or directory' \
                        'h - go up level' \
                        'g - go to top' \
                        'G - go to bottom' \
                        'q - quit' \
+                       'x - spawn a terminal' \
                        ': - cd to <input>' \
                        '/ - search current directory <input>*' \
                        '- - go to last directory' \

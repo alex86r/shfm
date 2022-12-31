@@ -27,10 +27,12 @@ ________________________________________________________________________________
 j - down
 k - up
 l - open file or directory
+e - edit file or directory
 h - go up level
 g - go to top
 G - go to bottom
 q - quit
+x - spawn a terminal
 : - cd to <input>
 / - search current directory <input>*
 - - go to last directory
@@ -45,6 +47,9 @@ down arrow  - down
 up arrow    - up
 left arrow  - go up level
 right arrow - open file or directory
+
+page up     - up 10 items
+page down   - down 10 items
 
 backspace   - up
 enter       - open file or directory
