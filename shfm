@@ -58,6 +58,7 @@ term_resize() {
 }
 
 term_scroll_down() {
+    echo 1 > /dev/null #bug?
     case $((y - $#)) in
         [0-9]*) return
     esac
@@ -275,7 +276,7 @@ main() {
     trap 'term_reset'  EXIT INT
     trap 'term_resize; term_setup; y=1 y2=1; redraw "$@"' WINCH
 
-    y=1 y2=1
+    y=1 y2=1 prevk=
     redraw "$@"
 
     while key=$(dd ibs=1 count=1 2>/dev/null); do
@@ -286,6 +287,17 @@ main() {
 
             j?|B2)
                 term_scroll_down "$@"
+            ;;
+
+            ~0) # PAGE UP/DOWN 
+                for i in $(seq 1 10)
+                do
+                    if [ $prevk -eq 5 ]; then
+                        term_scroll_up "$@"
+                    else
+                        term_scroll_down "$@"
+                    fi
+                done
             ;;
 
             l?|C2|"$esc") # ARROW RIGHT
@@ -422,6 +434,7 @@ main() {
                  '[1') esc=2 ;;
                     *) esc=0 ;;
         esac
+        prevk=$key
     done
 }
 
