@@ -250,12 +250,12 @@ main() {
 
     case $1 in
         -h|--help)
-            printf 'shfm -[hv] <starting dir>\n'
+            printf $(basename $0)' -[hv] <starting dir>\n'
             exit 0
         ;;
 
         -v|--version)
-            printf 'shfm 0.4.2\n'
+            printf $(basename $0)' 0.4.2-arfork\n'
             exit 0
         ;;
 
