@@ -325,16 +325,16 @@ main() {
     trap 'term_reset'  EXIT INT
     trap 'term_resize; term_setup; y=1 y2=1; redraw "$@"' WINCH
 
-    y=1 y2=1 dflag=0 iflag=0 tflag=0 hidden=0 prevk=
+    y=1 y2=1 dkeyb=0 ikeyb=0 tkeyb=0 hidden=0 prevk=
     redraw "$@"
 
     while key=$(dd ibs=1 count=1 2>/dev/null); do
         case $key${esc:=0} in
             d?)
                 y=1 y2=1
-                dflag=$((1 - $dflag))
-                tflag=0
-                found=$(find_files $hidden "" $dflag $iflag $tflag)
+                dkeyb=$((1 - $dkeyb))
+                tkeyb=0
+                found=$(find_files $hidden "" $dkeyb $ikeyb $tkeyb)
                 set -- $found
                 redraw "$@"
             ;;
@@ -353,16 +353,16 @@ main() {
             ;;
 
             i?)
-                iflag=$((1 - $iflag))
-                tflag=0
-                found=$(find_files $hidden "" $dflag $iflag $tflag)
+                ikeyb=$((1 - $ikeyb))
+                tkeyb=0
+                found=$(find_files $hidden "" $dkeyb $ikeyb $tkeyb)
                 set -- $found
                 redraw "$@"
             ;;
 
             t?)
-                tflag=$((1 - $tflag))
-                found=$(find_files $hidden "" $dflag $iflag $tflag)
+                tkeyb=$((1 - $tkeyb))
+                found=$(find_files $hidden "" $dkeyb $ikeyb $tkeyb)
                 set -- $found
                 redraw "$@"
             ;;
@@ -378,9 +378,9 @@ main() {
                     cmd_run "${SHFM_OPENER:="${EDITOR:=vi}"}" "$cur"
                     redraw "$@"
                 fi
-                dflag=0
-                iflag=0
-                tflag=0
+                dkeyb=0
+                ikeyb=0
+                tkeyb=0
             ;;
 
             h?|D2|"$bs_char"?) # ARROW LEFT
@@ -391,9 +391,9 @@ main() {
                      *) ltype= ;;
                 esac
 
-                dflag=0
-                iflag=0
-                tflag=0
+                dkeyb=0
+                ikeyb=0
+                tkeyb=0
 
                 set -- *
                 y=1 y2=1 cur=$1 hist=1
@@ -421,7 +421,7 @@ main() {
                     1) hidden=0 ;;
                     0) hidden=1 ;;
                 esac
-                found=$(find_files $hidden "" $dflag $iflag $tflag)
+                found=$(find_files $hidden "" $dkeyb $ikeyb $tkeyb)
                 set -- $found
                 y=1 y2=1 cur=$1
                 redraw "$@"
@@ -437,6 +437,10 @@ main() {
                     '~/'*) ans=$HOME/${ans#"~/"}
                 esac
 
+                dkeyb=0
+                ikeyb=0
+                tkeyb=0
+
                 cd -- "${ans:="$0"}" >/dev/null 2>&1|| continue
                 set -- *
                 y=1 y2=1 cur=$1
@@ -450,7 +454,7 @@ main() {
                 IFS="
 "
 
-                found=$(find_files $hidden "$ans" $dflag $iflag $tflag)
+                found=$(find_files $hidden "$ans" $dkeyb $ikeyb $tkeyb)
 
                 set -- $found
 
@@ -487,9 +491,9 @@ main() {
                     done
                 else
                     cd || continue
-                    dflag=0
-                    iflag=0
-                    tflag=0
+                    dkeyb=0
+                    ikeyb=0
+                    tkeyb=0
                     set -- *
                     y=1 y2=1 cur=$1
                     redraw "$@"
