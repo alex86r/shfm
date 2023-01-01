@@ -58,7 +58,6 @@ term_resize() {
 }
 
 term_scroll_down() {
-    echo 1 > /dev/null #bug?
     case $((y - $#)) in
         [0-9]*) return
     esac
@@ -289,17 +288,6 @@ main() {
                 term_scroll_down "$@"
             ;;
 
-            ~0) # PAGE UP/DOWN 
-                for i in $(seq 1 10)
-                do
-                    if [ $prevk -eq 5 ]; then
-                        term_scroll_up "$@"
-                    else
-                        term_scroll_down "$@"
-                    fi
-                done
-            ;;
-
             l?|C2|"$esc") # ARROW RIGHT
                 if [ -d "$cur" ] && cd -- "$cur" >/dev/null 2>&1; then
                     set -- *
@@ -405,10 +393,24 @@ main() {
             ;;
 
             \~?)
-                cd || continue
-                set -- *
-                y=1 y2=1 cur=$1
-                redraw "$@"
+                # PAGE UP
+                if [ $prevk -eq 5 ]; then
+                    for i in $(seq 1 10)
+                    do
+                        term_scroll_up "$@"
+                    done
+                #PAGE DOWN
+                elif [ $prevk -eq 6 ]; then
+                    for i in $(seq 1 10)
+                    do
+                        term_scroll_down "$@"
+                    done
+                else
+                    cd || continue
+                    set -- *
+                    y=1 y2=1 cur=$1
+                    redraw "$@"
+                fi
             ;;
 
             \!?)
