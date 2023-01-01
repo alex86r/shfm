@@ -24,10 +24,11 @@ ________________________________________________________________________________
 keybinds
 ________________________________________________________________________________
 
+d - toggle sort by directory first
+e - edit file or directory
 j - down
 k - up
 l - open file or directory
-e - edit file or directory
 h - go up level
 g - go to top
 G - go to bottom
@@ -48,8 +49,8 @@ up arrow    - up
 left arrow  - go up level
 right arrow - open file or directory
 
-page up     - up 10 items
-page down   - down 10 items
+page up     - up by 10 items
+page down   - down by 10 items
 
 backspace   - up
 enter       - open file or directory
@@ -59,7 +60,7 @@ todo
 ________________________________________________________________________________
 
 - [x] sanitize filenames for display.
-- [ ] print directories first (hard).
+- [x] print directories first (hard).
 - [x] fix buggy focus after exit from inline editor.
 - [ ] maybe file operations.
 - [x] add / to directories.

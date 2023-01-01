@@ -244,17 +244,43 @@ line_format() {
     printf '\r'
 }
 
+find_files() {
+   dept=$1
+   ans="$2"
+   dfirst=$3
+
+   case $dept in
+       0) dot='*' ;;
+       1) dot='.' ;;
+   esac
+
+   if [ $dept -eq 1 ] && [ -z $ans ]; then
+       ans='.'
+   fi
+
+   if [ $dfirst -eq 1 ]; then
+       res=$(find $dot -iname "$ans*" -mindepth $dept -maxdepth $dept -type d -exec \
+                basename {} \; | sort)
+       res=$(echo "$res\n$(find $dot -iname "$ans*" -maxdepth $dept \
+                \! -type d -exec basename {} \; | sort)")
+   else
+       res=$(find $dot -iname "$ans*" -mindepth $dept -maxdepth $dept \
+                  -exec basename {} \; | sort)
+   fi
+   echo "$res"
+}
+
 main() {
     set -e
 
     case $1 in
         -h|--help)
-            printf $(basename $0)' -[hv] <starting dir>\n'
+            printf ${0##*/}' -[hv] <starting dir>\n'
             exit 0
         ;;
 
         -v|--version)
-            printf $(basename $0)' 0.4.2-arfork\n'
+            printf ${0##*/}' 0.4.2-arfork\n'
             exit 0
         ;;
 
@@ -275,11 +301,19 @@ main() {
     trap 'term_reset'  EXIT INT
     trap 'term_resize; term_setup; y=1 y2=1; redraw "$@"' WINCH
 
-    y=1 y2=1 prevk=
+    y=1 y2=1 dflag=0 hidden=0 prevk=
     redraw "$@"
 
     while key=$(dd ibs=1 count=1 2>/dev/null); do
         case $key${esc:=0} in
+            d?)
+                y=1 y2=1
+                dflag=$((1 - $dflag))
+                found=$(find_files $hidden "" $dflag)
+                set -- $found
+                redraw "$@"
+            ;;
+
             k?|A2)
                 term_scroll_up "$@"
             ;;
@@ -330,11 +364,12 @@ main() {
             ;;
 
             .?)
-                case ${hidden:=1} in
-                    1) hidden=0; set -- .* ;;
-                    0) hidden=1; set -- *
+                case $hidden in
+                    1) hidden=0 ;;
+                    0) hidden=1 ;;
                 esac
-
+                found=$(find_files $hidden "" $dflag)
+                set -- $found
                 y=1 y2=1 cur=$1
                 redraw "$@"
             ;;
@@ -362,10 +397,8 @@ main() {
                 IFS="
 "
 
-                found='*'
-                if [ -n "$ans" ]; then
-                    found=$(find . -iname "$ans*" -maxdepth 1 -exec basename {} \;)
-                fi
+                found=$(find_files $hidden "$ans" $dflag)
+
                 set -- $found
 
                 unset IFS
@@ -393,7 +426,7 @@ main() {
                     do
                         term_scroll_up "$@"
                     done
-                #PAGE DOWN
+                # PAGE DOWN
                 elif [ $prevk -eq 6 ]; then
                     for i in $(seq 1 10)
                     do
@@ -424,10 +457,11 @@ main() {
             ;;
 
             \??)
-                set -- 'j - down' \
+                set -- 'd - toggle sort by directory first' \
+                       'e - edit file or directory' \
+                       'j - down' \
                        'k - up' \
                        'l - open file or directory' \
-                       'e - edit file or directory' \
                        'h - go up level' \
                        'g - go to top' \
                        'G - go to bottom' \
