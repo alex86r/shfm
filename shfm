@@ -245,29 +245,35 @@ line_format() {
 }
 
 find_files() {
-   dept=$1
-   ans="$2"
-   dfirst=$3
+    dept=$1
+    ans="$2"
+    dfirst=$3
+    ignorec=$4
 
-   case $dept in
-       0) dot='*' ;;
-       1) dot='.' ;;
-   esac
+    case $dept in
+        0) dot='*' ;;
+        1) dot='.' ;;
+    esac
 
-   if [ $dept -eq 1 ] && [ -z $ans ]; then
-       ans='.'
-   fi
+    case $ignorec in
+        0) sortf= ;;
+        1) sortf='-f' ;;
+    esac 
 
-   if [ $dfirst -eq 1 ]; then
-       res=$(find $dot -iname "$ans*" -mindepth $dept -maxdepth $dept -type d -exec \
-                basename {} \; | sort)
-       res=$(echo "$res\n$(find $dot -iname "$ans*" -maxdepth $dept \
-                \! -type d -exec basename {} \; | sort)")
-   else
-       res=$(find $dot -iname "$ans*" -mindepth $dept -maxdepth $dept \
-                  -exec basename {} \; | sort)
-   fi
-   echo "$res"
+    if [ $dept -eq 1 ] && [ -z $ans ]; then
+        ans='.'
+    fi
+
+    if [ $dfirst -eq 1 ]; then
+        res=$(find $dot -iname "$ans*" -mindepth $dept -maxdepth $dept -type d -exec \
+                basename {} \; | sort $sortf)
+        res=$(echo "$res\n$(find $dot -iname "$ans*" -maxdepth $dept \
+                \! -type d -exec basename {} \; | sort $sortf)")
+    else
+        res=$(find $dot -iname "$ans*" -mindepth $dept -maxdepth $dept \
+                  -exec basename {} \; | sort $sortf)
+    fi
+    echo "$res"
 }
 
 main() {
@@ -301,7 +307,7 @@ main() {
     trap 'term_reset'  EXIT INT
     trap 'term_resize; term_setup; y=1 y2=1; redraw "$@"' WINCH
 
-    y=1 y2=1 dflag=0 hidden=0 prevk=
+    y=1 y2=1 dflag=0 iflag=0 hidden=0 prevk=
     redraw "$@"
 
     while key=$(dd ibs=1 count=1 2>/dev/null); do
@@ -309,8 +315,13 @@ main() {
             d?)
                 y=1 y2=1
                 dflag=$((1 - $dflag))
-                found=$(find_files $hidden "" $dflag)
+                found=$(find_files $hidden "" $dflag $iflag)
                 set -- $found
+                redraw "$@"
+            ;;
+
+            e?)
+                cmd_run "${EDITOR:=vi}" "$cur"
                 redraw "$@"
             ;;
 
@@ -320,6 +331,13 @@ main() {
 
             j?|B2)
                 term_scroll_down "$@"
+            ;;
+
+            i?)
+                iflag=$((1 - $iflag))
+                found=$(find_files $hidden "" $dflag $iflag)
+                set -- $found
+                redraw "$@"
             ;;
 
             l?|C2|"$esc") # ARROW RIGHT
@@ -368,7 +386,7 @@ main() {
                     1) hidden=0 ;;
                     0) hidden=1 ;;
                 esac
-                found=$(find_files $hidden "" $dflag)
+                found=$(find_files $hidden "" $dflag $iflag)
                 set -- $found
                 y=1 y2=1 cur=$1
                 redraw "$@"
@@ -447,11 +465,6 @@ main() {
                 redraw "$@"
             ;;
 
-            e?)
-                cmd_run "${EDITOR:=vi}" "$cur"
-                redraw "$@"
-            ;;  
-
             x?)
                 $TERM & 
             ;;
@@ -461,6 +474,7 @@ main() {
                        'e - edit file or directory' \
                        'j - down' \
                        'k - up' \
+                       'i - toggle case sensitive sort' \
                        'l - open file or directory' \
                        'h - go up level' \
                        'g - go to top' \

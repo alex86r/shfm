@@ -28,6 +28,7 @@ d - toggle sort by directory first
 e - edit file or directory
 j - down
 k - up
+i - toggle case sensitive sort
 l - open file or directory
 h - go up level
 g - go to top
