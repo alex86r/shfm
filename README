@@ -34,6 +34,7 @@ h - go up level
 g - go to top
 G - go to bottom
 q - quit
+t - toggle sort by time modified
 x - spawn a terminal
 : - cd to <input>
 / - search current directory <input>*
