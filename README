@@ -9,7 +9,7 @@ screenshot: https://user-images.githubusercontent.com/6799467/89270554-2b40ab00-
 features
 ________________________________________________________________________________
 
-* no dependencies other than a POSIX shell + POSIX [, printf, dd and stty ***
+* no dependencies other than a POSIX shell + POSIX [, printf, echo, basename, find, dd and stty ***
 * tiny
 * single file
 * no compilation needed
