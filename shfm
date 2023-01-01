@@ -378,6 +378,9 @@ main() {
                     cmd_run "${SHFM_OPENER:="${EDITOR:=vi}"}" "$cur"
                     redraw "$@"
                 fi
+                dflag=0
+                iflag=0
+                tflag=0
             ;;
 
             h?|D2|"$bs_char"?) # ARROW LEFT
@@ -387,6 +390,10 @@ main() {
                     '') cd .. || continue ;;
                      *) ltype= ;;
                 esac
+
+                dflag=0
+                iflag=0
+                tflag=0
 
                 set -- *
                 y=1 y2=1 cur=$1 hist=1
@@ -443,7 +450,7 @@ main() {
                 IFS="
 "
 
-                found=$(find_files $hidden "$ans" $dflag $tflag)
+                found=$(find_files $hidden "$ans" $dflag $iflag $tflag)
 
                 set -- $found
 
@@ -480,6 +487,9 @@ main() {
                     done
                 else
                     cd || continue
+                    dflag=0
+                    iflag=0
+                    tflag=0
                     set -- *
                     y=1 y2=1 cur=$1
                     redraw "$@"
