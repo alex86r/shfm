@@ -484,13 +484,13 @@ main() {
 
             \~?)
                 # PAGE UP
-                if [ $prevk -eq 5 ]; then
+                if [ "$prevk" = "5" ]; then
                     for i in $(seq 1 10)
                     do
                         term_scroll_up "$@"
                     done
                 # PAGE DOWN
-                elif [ $prevk -eq 6 ]; then
+                elif [ "$prevk" = "6" ]; then
                     for i in $(seq 1 10)
                     do
                         term_scroll_down "$@"
