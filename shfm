@@ -271,6 +271,9 @@ find_files() {
         1) query="$query -type d" ;;
     esac
 
+    # deal with newlines in filename
+    query="$query -print0 | tr -s '\n' '?' | xargs -0 -I {} echo {}"
+
     # sort ignore case sensitive
     case $ignorec in
         0) sortby=' | sort';;
@@ -279,12 +282,12 @@ find_files() {
 
     # sort by time modified or lexicographical
     case $timem in
-        0) query="$query $sortby"             ;;
-        1) query="$query -exec ls -1dt {} +"  ;;
+        0) query="$query $sortby"          ;;
+        1) query="$query | xargs ls -1dt"  ;;
     esac
 
-    # non-directories second
-    query2=
+    # non-directories last
+    ndquery=
     case $dfirst in
         1) ndquery=$(echo "$query" | sed "s/-type d/\\\! -type d/") ;;
     esac
