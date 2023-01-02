@@ -245,52 +245,56 @@ line_format() {
 }
 
 find_files() {
-    dept=$1
+    hidden=$1
     ans="$2"
     dfirst=$3
     ignorec=$4
     timem=$5
 
-    case $dept in
-        0) dot='*' ;;
-        1) dot='.' ;;
+    st=$hidden
+    if [ -n "$ans" ]; then
+        st=2
+    fi
+
+    # ex/include hidden files or search by keyword
+    case $st in
+        0) query="find . \! -iname '.*'" ;;
+        1) query="find . -iname '*'"     ;;
+        2) query="find . -iname '$ans*'" ;;
     esac
 
+    # pwd only
+    query="$query -mindepth 1 -maxdepth 1"
+
+    # directories first
+    case $dfirst in
+        1) query="$query -type d" ;;
+    esac
+
+    # sort ignore case sensitive
     case $ignorec in
-        0) sortf= ;;
-        1) sortf='-f' ;;
+        0) sortby=' | sort';;
+        1) sortby=' | sort -f' ;;
     esac
 
+    # sort by time mod or alphabetic
     case $timem in
-        0) lsflags='-1d' ;;
-        1) lsflags='-1dt' ;;
+        0) query="$query $sortby"             ;;
+        1) query="$query -exec ls -1dt {} +"  ;;
     esac
 
-    if [ $dept -eq 1 ] && [ -z $ans ]; then
-        ans='.'
-    fi
+    # non-directories second
+    query2=
+    case $dfirst in
+        1) ndquery=$(echo "$query" | sed "s/-type d/\\\! -type d/") ;;
+    esac
 
-    if [ $dfirst -eq 1 ]; then
-        diro=$(find $dot -iname "$ans*" -mindepth $dept \
-                -maxdepth $dept -type d \
-                -exec ls $lsflags {} +)
-        if [ $timem -eq 0 ]; then
-            diro=$(echo "$diro" | sort $sortf)
-        fi
-        filo=$(find $dot -iname "$ans*" -maxdepth $dept \
-                \! -type d -exec ls $lsflags {} +)
-        if [ $timem -eq 0 ]; then
-            filo=$(echo "$filo" | sort $sortf)
-        fi
+    ev1=$(eval "$query")
+    ev2=$(eval "$ndquery")
 
-        res=$(echo "$diro\n$filo" | xargs -I {} basename {})
-    else
-        res=$(find $dot -iname "$ans*" -mindepth $dept -maxdepth $dept \
-                  -exec ls $lsflags {} + | xargs -I {} basename {})
-        if [ $timem -eq 0 ]; then
-            res=$(echo "$res" | sort $sortf)
-        fi
-    fi
+    # merge evals and removes ./
+    res=$(echo "$ev1\n$ev2" | xargs -I {} basename {})
+
     echo "$res"
 }
 
